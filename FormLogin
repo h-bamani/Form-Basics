@@ -1,0 +1,78 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.IO;
+
+namespace FormLog
+{
+    public partial class FormLog : Form
+    {
+        string invalue;
+        string[] splitting = new string[2];
+
+        public FormLog()
+        {
+            InitializeComponent();
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void btnLogon_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (StreamReader inFile = new StreamReader("User information.txt"))
+                {
+                    while ((invalue = inFile.ReadLine()) != null)
+                    {
+                        splitting = invalue.Split(',');
+
+                        if ((txtName.Text.Equals(splitting[5])) && (txtPass.Text.Equals(splitting[6])))
+                        {
+                            this.Hide();
+                        }
+                    }
+
+                    if (!txtPass.Text.Equals(splitting[1]))
+                    {
+                        lblMessage.Show();
+                        txtPass.Clear();
+                    }
+                }
+
+                using (StreamWriter myFile = new StreamWriter("Currently logged on.txt"))
+                {
+                    myFile.WriteLine(txtName.Text);
+                }
+            }
+            catch (IOException ioe)
+            {
+                MessageBox.Show(ioe.Message);
+            }
+        }
+
+        private void linkReg_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            FormReg myReg = new FormReg();
+            myReg.ShowDialog();
+            myReg.Dispose();
+        }
+
+        private void OnFormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                File.Delete("Currently logged on.txt");
+                Application.Exit();
+            }
+        }
+    }
+}
