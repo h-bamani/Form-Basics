@@ -1,0 +1,112 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.IO;
+
+namespace FormLog
+{
+    public partial class FormDeath : Form
+    {
+        DeathCert myDeath = new DeathCert();
+
+        string invalue;
+        string logvalue;
+        string userOnline;
+        string[] splitting = new string[10];
+
+        public FormDeath()
+        {
+            InitializeComponent();
+        }
+
+        private void FormDeath_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                using (StreamReader file = new StreamReader("Currently logged on.txt"))
+                {
+                    while ((logvalue = file.ReadLine()) != null)
+                    {
+                        userOnline = logvalue;
+                    }
+                }
+
+                using (StreamReader inFile = new StreamReader("User information.txt"))
+                {
+                    while ((invalue = inFile.ReadLine()) != null)
+                    {
+                        splitting = invalue.Split(',');
+
+                        if (invalue.Contains(userOnline))
+                        {
+                            txtSurnameApplicant.Text = splitting[0];
+                            txtIDApplicant.Text = splitting[11];
+                        }
+                    }
+                }
+            }
+            catch (IOException ioe)
+            {
+                MessageBox.Show(ioe.Message);
+            }
+        }
+
+        private void btnDeathReport_Click(object sender, EventArgs e)
+        {
+            if (validateFields() == true)
+            {
+                try
+                {
+                    myDeath.IDNumberDeceased = txtIDNumDeceased.Text;
+                    myDeath.SurnameDeceased = txtSurnameDeceased.Text;
+                    myDeath.DateOfBirth = txtDOB.Text;
+                    myDeath.MaidenName = txtMaiden.Text;
+                    myDeath.PlaceOfBirth = txtPlaceOfBirth.Text;
+                    myDeath.Forename = txtForename.Text;
+                    myDeath.DateOfDeath = txtDOD.Text;
+                    myDeath.DeathNum = txtDeathNum.Text;
+                    myDeath.PlaceOfDeath = txtPlaceOfDeath.Text;
+                    myDeath.Undertaker = txtUndertaker.Text;
+
+                    myDeath.SurnameApplicant = txtSurnameApplicant.Text;
+                    myDeath.IDNumberApplicant = txtIDApplicant.Text;
+                }
+                catch (NullReferenceException)
+                {
+                }
+
+                validateFields();
+
+                MessageBox.Show(myDeath.generateReport());
+                this.Dispose();
+            }
+        }
+
+        private bool validateFields()
+        {
+            bool validText = false;
+
+            if (!txtIDNumDeceased.Text.Equals("") && !txtSurnameDeceased.Text.Equals("") && !txtDOB.Equals("") && !txtDOB.Text.Equals("") && !txtPlaceOfBirth.Equals("") && !txtForename.Text.Equals("")
+                && !txtDOD.Text.Equals("") && !txtDeathNum.Equals("") && !txtPlaceOfDeath.Equals("") && !txtUndertaker.Equals("") && !txtSurnameApplicant.Equals("") && !txtIDApplicant.Equals(""))
+            {
+                validText = true;
+            }
+            else
+            {
+                MessageBox.Show("Please make sure you have filled all the information");
+            }
+
+            return validText;
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            this.Dispose();
+        }
+    }
+}
