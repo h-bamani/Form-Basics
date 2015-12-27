@@ -1,0 +1,183 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.IO;
+
+namespace FormLog
+{
+    public partial class FormBirth : Form
+    {
+        BirthCert myBirth = new BirthCert();
+
+        string invalue;
+        string logvalue;
+        string userOnline;
+        string[] splitting = new string[10];
+
+        public FormBirth()
+        {
+            InitializeComponent();
+        }
+
+        private void btnRadioNo_CheckedChanged(object sender, EventArgs e)
+        {
+            lblApplicantDetails.Visible = true;
+            lblSurnameApplicant.Visible = true;
+            lblForenameApplicant.Visible = true;
+            txtSurnameApplicant.Visible = true;
+            txtForenameApplicant.Visible = true;
+
+            btnBirthReport.Location = new Point(716,728);
+            btnCancel.Location = new Point(889,728);
+
+            ReadTheFile();
+        }
+
+        private void btnRadioYes_CheckedChanged(object sender, EventArgs e)
+        {
+            lblApplicantDetails.Visible = false;
+            lblSurnameApplicant.Visible = false;
+            lblForenameApplicant.Visible = false;
+            txtSurnameApplicant.Visible = false;
+            txtForenameApplicant.Visible = false;
+
+            btnBirthReport.Location = new Point(735,585);
+            btnCancel.Location = new Point(906,585);
+
+            ReadTheFile();
+        }
+
+        private void ReadTheFile()
+        {
+            try
+            {
+                using (StreamReader file = new StreamReader("Currently logged on.txt"))
+                {
+                    while ((logvalue = file.ReadLine()) != null)
+                    {
+                        userOnline = logvalue;
+                    }
+                }
+
+                using (StreamReader inFile = new StreamReader("User information.txt"))
+                {
+                    while ((invalue = inFile.ReadLine()) != null)
+                    {
+                        splitting = invalue.Split(',');
+
+                        if (invalue.Contains(userOnline))
+                        {
+                            if (btnRadioNo.Checked == true)
+                            {
+                                txtSurnameApplicant.Text = splitting[0];
+                                txtForenameApplicant.Text = splitting[1];
+
+                                txtIDConcerned.Clear();
+                                txtSurnameConcerned.Clear();
+                                txtForenameConcerned.Clear();
+                                txtDOB.Clear();
+
+                                txtIDConcerned.Focus();
+                            }
+                            else if (btnRadioYes.Checked == true)
+                            {
+                                txtSurnameConcerned.Text = splitting[0];
+                                txtForenameConcerned.Text = splitting[1];
+                                txtIDConcerned.Text = splitting[11];
+                                txtDOB.Text = splitting[2];
+
+                                txtSurnameApplicant.Clear();
+                                txtForenameApplicant.Clear();
+
+                                txtMaidenConcerned.Focus();
+                            }
+                        }
+                    }
+                }
+            }
+            catch (IOException ioe)
+            {
+                MessageBox.Show(ioe.Message);
+            }
+        }
+
+        private void btnBirthReport_Click(object sender, EventArgs e)
+        {
+            if (validateFields() == true)
+            {
+                try
+                {
+                    myBirth.YesOption = btnRadioYes.Checked;
+                    myBirth.NoOption = btnRadioNo.Checked;
+
+                    myBirth.IDNumber = txtIDConcerned.Text;
+                    myBirth.SurnameConcerned = txtSurnameConcerned.Text;
+                    myBirth.ForenameConcerned = txtForenameConcerned.Text;
+                    myBirth.DateOfBirth = txtDOB.Text;
+                    myBirth.MaidenConcerned = txtMaidenConcerned.Text;
+                    myBirth.BirthNum = txtBirthNum.Text;
+                    myBirth.PlaceOfBirth = txtPlaceOfBirth.Text;
+
+                    myBirth.SurnameFather = txtSurnameFather.Text;
+                    myBirth.ForenameFather = txtForenameFather.Text;
+
+                    myBirth.MaidenMother = txtMaidenMother.Text;
+                    myBirth.ForenameMother = txtForenameMother.Text;
+
+                    myBirth.SurnameApplicant = txtSurnameApplicant.Text;
+                    myBirth.ForenameApplicant = txtForenameApplicant.Text;
+                }
+                catch (NullReferenceException)
+                {
+                }
+
+                validateFields();
+
+                MessageBox.Show(myBirth.generateReport());
+                this.Dispose();
+            }
+        }
+
+        private bool validateFields()
+        {
+            bool validText = false;
+
+            if (btnRadioYes.Checked == true)
+            {
+                if (!txtIDConcerned.Text.Equals("") && !txtSurnameConcerned.Text.Equals("") && !txtForenameConcerned.Equals("") && !txtDOB.Text.Equals("") && !txtBirthNum.Text.Equals("")
+                    && !txtPlaceOfBirth.Equals("") && !txtSurnameFather.Text.Equals("") && !txtForenameFather.Text.Equals("") && !txtMaidenMother.Equals("") && !txtForenameMother.Equals(""))
+                {
+                    validText = true;
+                }
+                else
+                {
+                    MessageBox.Show("Please make sure you have filled all the information");
+                }
+            }
+            else if (btnRadioNo.Checked == true)
+            {
+                if (!txtIDConcerned.Text.Equals("") && !txtSurnameConcerned.Text.Equals("") && !txtForenameConcerned.Equals("") && !txtDOB.Text.Equals("") && !txtBirthNum.Text.Equals("")
+                   && !txtPlaceOfBirth.Equals("") && !txtSurnameFather.Text.Equals("") && !txtForenameFather.Text.Equals("") && !txtMaidenMother.Equals("") && !txtForenameMother.Equals("") && !txtSurnameApplicant.Equals("") && !txtForenameApplicant.Equals(""))
+                {
+                    validText = true;
+                }
+                else
+                {
+                    MessageBox.Show("Please make sure you have filled all the information");
+                }
+            }
+
+            return validText;
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            this.Dispose();
+        }
+    }
+}
